@@ -18,7 +18,7 @@ function showPassword() {
 document.querySelector('#username').addEventListener('keydown', inputKeyDown);
 document.querySelector('.pswrd')?.addEventListener('keydown', inputKeyDown);
 
-ledcubeWS.addEventListener(ledcubeWS.EVENTS.LOGGED, event => onLogged(event));
+// ledcubeWS.addEventListener(ledcubeWS.EVENTS.LOGGED, event => onLogged(event));
 ledcubeWS.addEventListener(ledcubeWS.EVENTS.LOGIN_REJECTED, event => {
 	console.log('login rejected', event);
 	switch (event.reason) {

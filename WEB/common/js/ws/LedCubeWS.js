@@ -23,53 +23,29 @@ export class LedCubeWS extends EventEmitter {
 	constructor() {
 		super();
 		Object.values(this.EVENTS).forEach(event => this.registerEvent(event));
+		setTimeout(() => this.emitEvent(this.EVENTS.LOGGED), 100);
 	}
 
 	isConnected() {
-		return this.is_connected;
+		return false;
 	}
 
 	isConnecting() {
-		return this.ws && (this.ws.readyState == this.ws.CONNECTING || (this.ws.readyState == this.ws.OPEN && !this.is_connected));
+		return false;
 	}
 
 	connect() {
-		if (this.ws && (this.ws.readyState == this.ws.OPEN)) {
-			if (this.is_connected)
-				console.warn('Already connected');
-			else
-				console.warn('Already connecting');
-			return;
-		}
-		this.ws = new WebSocket('ws://' + location.host + '/ws');
-		this.ws.onopen = () => console.log('open, waiting for server challenge to login');
-		this.ws.onmessage = event => this.#onMessage.call(this, event);
-		this.ws.onclose = () => {
-			console.log(`WebSocket Connection ended`);
-			if (this.is_connected) {
-				this.#whenLoggedOut();
-				this.emitEvent(this.EVENTS.DISCONNECTED);
-			}
-			this.ws = null;
-		}
+		console.log('gh-pages: not connecting to server');
+		this.emitEvent(this.EVENTS.LOGIN_REJECTED, { reason: 'cancel' });
 	}
 
 	tryCookieConnect() {
-		var cookieKey = localStorage.getItem('ck');
-		var clientChallenge = localStorage.getItem('cc');
-
-		if (!cookieKey || !clientChallenge) {
-			return this.isConnected() || this.isConnecting();
-		}
-		this.connect();
-		return true;
+		return false;
 	}
 
 	loggoff() {
-		this.send('connection', { status: 'loggoff' });
 		localStorage.clear();
 		this.logging = false;
-		this.ws.close();
 	}
 
 	EVENTS = {
@@ -84,31 +60,12 @@ export class LedCubeWS extends EventEmitter {
 	 * @param {object} data
 	 */
 	send(type, data) {
-		if (!this.ws || this.ws.readyState != this.ws.OPEN) return;
-		if (!this.is_connected && type != 'auth') return;
-		this.ws.send(JSON.stringify({ ...data, type, date: Date.now().toString() }));
 	}
 
 	/**
 	 * @param {string} serverChallenge
 	 */
 	sendPassword(serverChallenge) {
-		this.logging = true;
-		var cookieKey = localStorage.getItem('ck');
-		var clientChallenge = localStorage.getItem('cc');
-		var sessionId = localStorage.getItem('sid');
-
-		if (!cookieKey || !clientChallenge) {
-			document.location.href = '/login';
-			return;
-		}
-
-		const key = dcodeIO.bcrypt.hashSync(cookieKey + serverChallenge);
-		this.send('auth', {
-			key,
-			challenge: clientChallenge,
-			id: sessionId
-		});
 	}
 
 	/**
@@ -120,45 +77,10 @@ export class LedCubeWS extends EventEmitter {
 	/**
 	 * @param {string} type
 	 * @param {object} data
+	 * @returns {Promise<{success: boolean}>}
 	 */
-	async sendAndWaitAnswer(type, data) {
-		if (this.isConnecting()) await new Promise(resolve => {
-			setTimeout(resolve, 3000);
-			setInterval(() => {
-				if (!this.isConnecting()) resolve();
-			}, 100);
-		});
-		if (!this.ws || this.ws.readyState != this.ws.OPEN) return { success: false, error: 'Not connected' };
-		if (!this.is_connected && type != 'auth') return { success: false, error: 'Not logged' };
-		const now = Date.now();
-		if (this.#lastWaitingTime < now) {
-			this.#lastWaitingTime = now;
-			this.#waitingTimeId = 0;
-		}
-		const id = this.#waitingTimeId++;
-		const timestamp = now.toString() + '.' + id.toString();
-		/**
-		 * @type {Promise<{type: string, timestamp: string, success: boolean}>}
-		 */
-		const promise = new Promise((resolve, reject) => {
-			this.#waitingForAnwsers.push({
-				time: now,
-				timestamp,
-				type,
-				resolve,
-				reject
-			});
-			data.timestamp = timestamp;
-			this.send(type, data);
-			setTimeout(() => {
-				const reqest = this.#waitingForAnwsers.find(r => r.timestamp == timestamp);
-				if (reqest) {
-					this.#waitingForAnwsers.splice(this.#waitingForAnwsers.indexOf(reqest), 1);
-					reqest.reject('timeout');
-				}
-			}, 10000); // Timeout 10 seconds
-		});
-		return promise;
+	sendAndWaitAnswer(type, data) {
+		return { success: false, error: 'Not connected' };
 	}
 
 	/**
@@ -210,8 +132,14 @@ export class LedCubeWS extends EventEmitter {
 
 			/** @param {string} fileName @returns {Promise<{animation: LEDAnimation}>} */
 			get: async (fileName) => {
-				const response = await this.sendAndWaitAnswer('ledcube', { action: 'animation.get', fileName });
-				response.animation = this.decodeAnimation(response.animation);
+				// Get the content of '/web/animations/fileName' with a GET request
+				if (!fileName) return { success: false };
+				const response = await fetch(webFolder + 'animations/' + fileName);
+				response.success = response.ok;
+				const reader = response.body.getReader();
+				const uint8Array = await reader.read();
+				const data = new TextDecoder().decode(uint8Array.value);
+				response.animation = this.decodeAnimation(data);
 				return response;
 			},
 
@@ -223,7 +151,39 @@ export class LedCubeWS extends EventEmitter {
 			},
 
 			/** @returns {Promise<{animations: string[]}>} */
-			list: () => this.sendAndWaitAnswer('ledcube', { action: 'animation.list' }),
+			list: () => {
+				return {
+					success: true,
+					animations: [
+						"cercle chromatique carre.json.txt",
+						"cercle chromatique rond.json.txt",
+						"coeur.json.txt",
+						"cube chromatique statique.json.txt",
+						"faux 1 plan long.json.txt",
+						"feux 1 plan.json.txt",
+						"feux 2 plans.json.txt",
+						"GPSE.json.txt",
+						"growCube.json.txt",
+						"Noel.json.txt",
+						"orientation des leds.json.txt",
+						"patriote.json.txt",
+						"Polytech chargement.json.txt",
+						"Polytech va et vient.json.txt",
+						"radar et cible.json.txt",
+						"radar.json.txt",
+						"Robotek apparition.json.txt",
+						"Robotek rainbow.json.txt",
+						"Robotek wave.json.txt",
+						"snakube.json.txt",
+						"sphere bleu.json.txt",
+						"sphere RGB lent.json.txt",
+						"sphere RGB smooth.json.txt",
+						"stroboscope.json.txt",
+						"wave noalias.json.txt",
+						"white.json.txt",
+					],
+				}
+			},
 
 			/** @returns {Promise<{success:boolean}>} */
 			stop: () => this.sendAndWaitAnswer('ledcube', { action: 'animation.stop' }),
