@@ -97,7 +97,7 @@ export class LEDFrame {
 	 * @param {number[][]} plan
 	 */
 	setPlan(axis, index, plan) {
-		switch (axis.toLowerCase()) {
+		switch (axis.toLowerCase?.() || 'x') {
 			case 'x':
 				plan.forEach((row, z) => row.forEach((color, y) => this.setColor(index, y, z, color)));
 				break;

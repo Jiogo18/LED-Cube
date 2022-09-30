@@ -190,12 +190,11 @@ bool LEDCubeManager::onMessageReceived(mg_connection *c, const JsonReader &jsonD
 			return true;
 		} else if (subAction == "set") {
 			// Set the layer
-			if (!jsonDoc.HasMember("layer")) {
+			int **layer = AnimationLoaders::AnimationLoader().jsonToLayer(jsonDoc);
+			if (!layer) {
 				answer.Add("success", false);
 				return true;
 			}
-
-			int **layer = AnimationLoaders::AnimationLoader().jsonToLayer(jsonDoc);
 			cube->setLayer(layer, layerIndex, direction);
 
 			// Send the event to every client subscribed to changes
@@ -213,7 +212,8 @@ bool LEDCubeManager::onMessageReceived(mg_connection *c, const JsonReader &jsonD
 			}
 			eventMsg.GetDocument().AddMember("lines", lines, eventMsg.GetAllocator());
 			eventMsg.Add("layerIndex", layerIndex);
-			eventMsg.Add("direction", direction);
+			eventMsg.Add("direction", direction == 0 ? "X" : direction == 1 ? "Y"
+																			: "Z");
 			sendLEDCubeEvent(eventMsg.stringify());
 
 			for (int i = 0; i < YLENGTH; ++i) {
@@ -228,7 +228,7 @@ bool LEDCubeManager::onMessageReceived(mg_connection *c, const JsonReader &jsonD
 		}
 	} else if (action == "set-animation-frames-count") {
 		int framesCount = jsonDoc.getInt("count", 1);
-		int fps = jsonDoc.getInt("fps", 100);
+		int fps = jsonDoc.getInt("fps", 10);
 		cube->setAnimation(new Animation(framesCount, fps));
 		answer.Add("success", true);
 		return true;
