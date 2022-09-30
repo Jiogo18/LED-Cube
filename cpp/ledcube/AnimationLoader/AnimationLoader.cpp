@@ -8,10 +8,10 @@
 #define AnimationSaver_Json AnimationLoaders::AnimationLoader_v2
 
 int AnimationLoaders::AnimationLoader::getVersionOf(const std::string &data) {
-	if (AnimationLoader_v1().isVersion(data)) {
-		return 1;
-	} else if (AnimationLoader_v2().isVersion(data)) {
+	if (AnimationLoader_v2().isVersion(data)) {
 		return 2;
+	} else if (AnimationLoader_v1().isVersion(data)) {
+		return 1;
 	} else {
 		throw std::invalid_argument("Unknown version");
 		return -1;
@@ -40,7 +40,7 @@ Animation *AnimationLoaders::AnimationLoader::loadAnimationFromFile(const std::s
 	std::string fileName = path.substr(lastSlash + 1);
 	Animation *anim = nullptr;
 	int isVersion[2] = {0, 0};
-	if (stringEndsWith(fileName, ".json.txt")) {
+	if (stringEndsWith(fileName, ".json.txt") || stringEndsWith(fileName, ".ledcube")) {
 		// Special extension => try v2 first
 		try {
 			anim = AnimationLoader_v2().loadAnimationFromFile(path);

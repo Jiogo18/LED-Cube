@@ -5,7 +5,8 @@
 bool AnimationLoaders::AnimationLoader_v2::isVersion(const std::string &data) {
 	std::regex versionRegex("^2\\s+[a-zA-Z0-9\\+/=]+$", std::regex_constants::ECMAScript | std::regex_constants::icase);
 
-	return std::regex_match(data, versionRegex);
+	std::string dataCopy = data.length() > 24000 ? data.substr(0, 24000) : data;
+	return std::regex_match(dataCopy, versionRegex);
 }
 
 Animation *AnimationLoaders::AnimationLoader_v2::loadAnimation(std::istream &stream) {
@@ -95,7 +96,7 @@ Animation *AnimationLoaders::AnimationLoader_v2::jsonToAnimation(const JsonReade
 		std::cerr << "Invalid animation data (no frame duration)" << std::endl;
 		return nullptr;
 	}
-	int frameDuration = document.getInt("frameDuration", 50) * MS_CLOCK;
+	int frameDuration = document.getInt("frameDuration", 50);
 
 	// get name
 	std::string name = document.getString("name", "");
@@ -178,7 +179,7 @@ void AnimationLoaders::AnimationLoader_v2::animationToJson(const Animation *anim
 	// set version, frame count, and frame duration, contentType
 	document.AddMember("version", 2, document.GetAllocator());
 	document.AddMember("frameCount", animation->getFrameCount(), document.GetAllocator());
-	document.AddMember("frameDuration", (int)(animation->getFrameDuration() / MS_CLOCK), document.GetAllocator());
+	document.AddMember("frameDuration", (int)(animation->getFrameDuration()), document.GetAllocator());
 	document.AddMember("contentType", "animation", document.GetAllocator());
 	document.AddMember("name", rapidjson::Value(animation->getName().c_str(), animation->getName().length()), document.GetAllocator());
 

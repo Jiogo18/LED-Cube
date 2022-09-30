@@ -155,32 +155,34 @@ export class LedCubeWS extends EventEmitter {
 				return {
 					success: true,
 					animations: [
-						"cercle chromatique carre.json.txt",
-						"cercle chromatique rond.json.txt",
-						"coeur.json.txt",
-						"cube chromatique statique.json.txt",
-						"faux 1 plan long.json.txt",
-						"feux 1 plan.json.txt",
-						"feux 2 plans.json.txt",
-						"GPSE.json.txt",
-						"growCube.json.txt",
-						"Noel.json.txt",
-						"orientation des leds.json.txt",
-						"patriote.json.txt",
-						"Polytech chargement.json.txt",
-						"Polytech va et vient.json.txt",
-						"radar et cible.json.txt",
-						"radar.json.txt",
-						"Robotek apparition.json.txt",
-						"Robotek rainbow.json.txt",
-						"Robotek wave.json.txt",
-						"snakube.json.txt",
-						"sphere bleu.json.txt",
-						"sphere RGB lent.json.txt",
-						"sphere RGB smooth.json.txt",
-						"stroboscope.json.txt",
-						"wave noalias.json.txt",
-						"white.json.txt",
+						"cercle chromatique carre.ledcube",
+						"cercle chromatique rond.ledcube",
+						"coeur.ledcube",
+						"cube chromatique statique.ledcube",
+						"feux 1 plan long.ledcube",
+						"feux 1 plan.ledcube",
+						"feux 2 plans.ledcube",
+						"GPSE.ledcube",
+						"growCube.ledcube",
+						"meduse.ledcube",
+						"Noel.ledcube",
+						"orientation des leds.ledcube",
+						"patriote.ledcube",
+						"Polytech chargement.ledcube",
+						"Polytech va et vient.ledcube",
+						"radar et cible.ledcube",
+						"radar.ledcube",
+						"Robotek apparition.ledcube",
+						"Robotek rainbow.ledcube",
+						"Robotek wave.ledcube",
+						"snakube.ledcube",
+						"sphere bleu.ledcube",
+						"sphere RGB lent.ledcube",
+						"sphere RGB smooth.ledcube",
+						"stroboscope.ledcube",
+						"wave noalias 2.ledcube",
+						"wave noalias.ledcube",
+						"white.ledcube",
 					],
 				}
 			},
@@ -423,7 +425,24 @@ export class LedCubeWS extends EventEmitter {
 	storeAnimationLocal(animation) {
 		const animationData = this.encodeAnimation(animation);
 		const key = 'animation_' + Date.now();
-		localStorage.setItem(key, animationData);
+		var added = false;
+		do {
+			try {
+				localStorage.setItem(key, animationData);
+				added = true;
+			}
+			catch (e) {
+				// Remove 5 oldest animations
+				const keys = Object.keys(localStorage).filter(k => k.startsWith('animation_'));
+				keys.sort();
+				if (keys.length == 0) {
+					throw e; // There is not enough space to store the animation
+				}
+				for (let i = 0; i < 5 && i < keys.length; i++) {
+					localStorage.removeItem(keys[i]);
+				}
+			}
+		} while (!added);
 		return key;
 	}
 

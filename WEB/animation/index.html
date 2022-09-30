@@ -14,6 +14,13 @@
 	<link rel="stylesheet" href="../common/css/Main.css">
 
 	<script>var webFolder = '../';</script>
+	<link rel="modulepreload" href="../common/js/utils/ColorPicker.js">
+	<link rel="modulepreload" href="../common/js/utils/EventEmitter.js">
+	<link rel="modulepreload" href="../common/js/utils/frame.js">
+	<link rel="modulepreload" href="../common/js/utils/notifications.js">
+	<link rel="modulepreload" href="../common/js/viewer/cubeViewer.js">
+	<link rel="modulepreload" href="../common/js/ws/LedCubeWS.js">
+	<link rel="modulepreload" href="../common/js/ws/main.js">
 	<script src="../include/bcryptjs/dist/bcrypt.js"></script>
 	<script src="../include/zip/pako.js"></script>
 	<script src="../include/zip/base64.js"></script>
@@ -42,7 +49,7 @@
 			Le filtre est un regex, ex : playAnimationAleat("robotek_.*") lance toutes les animations qui commencent par "robotek_"
 		-->
 		<button onclick="ledcubeRequests.playAnimationAleat()" class="purple">Animations aléatoires</button>
-		<button class="blue" onclick="importAnimation()"><input type="file" style="display: none;" id="fileInput" accept=".json.txt,.ledcube"></input>Importer une
+		<button class="blue" onclick="importAnimation()"><input type="file" style="display: none;" id="fileInput" accept=".ledcube"></input>Importer une
 			animation</button>
 		<button onclick="ledcubeRequests.stopAnimation()" class="red">Arrêter l'animation</button>
 	</div>
@@ -70,7 +77,7 @@
 		}
 
 		async function importAnimation() {
-			// ovrir une boite de dialogue pour importer un fichier .json.txt depuis l'ordinateur du client
+			// ovrir une boite de dialogue pour importer un fichier .ledcube depuis l'ordinateur du client
 			fileInput.click();
 		}
 	</script>

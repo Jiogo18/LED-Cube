@@ -60,6 +60,7 @@ export class CubeViewer extends EventEmitter {
 			}
 		}
 		renderer.render(scene, camera);
+		this.#emitFramesChanged();
 	}
 
 	animInterval = null;

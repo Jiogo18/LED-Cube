@@ -205,7 +205,7 @@ async function sendMatrice(options) {
 			frames = generateFramesWithFormule();
 		} catch (error) {
 			alert(error);
-			console.error(error);
+			console.error(error, { error });
 			return;
 		}
 	} else {
@@ -355,6 +355,10 @@ var formule_input;
  * @type {HTMLDivElement}
  */
 var fill_formule;
+/**
+ * @type {string[]}
+ */
+var customVariables = [];
 
 function onFormuleChanged() {
 	const formule = getFormule();
@@ -362,6 +366,7 @@ function onFormuleChanged() {
 	var error;
 	formuleNeedImage = false;
 	fill_formule.innerHTML = '';
+	customVariables = [];
 
 	try {
 		systeme = new JigMath.System(formule);
@@ -451,13 +456,34 @@ function fillSpanWithText(span, text) {
 }
 
 /**
+ * @param {EquaVariable} item
+ */
+function isVariableDefined(item) {
+	if (['x', 'y', 'z', 't', 'xM', 'yM', 'zM', 'tMax', 'pi'].includes(item.name)) return true;
+	if (customVariables.includes(item.name)) return true;
+
+	/** @type {EquaBlob} */
+	var equaBlob = item.parent?.parent;
+	/** @type {EquaFunction} */
+	var equaFunction = equaBlob?.parent;
+	if (equaBlob?.constructor === JigMath.EquaBlob && equaFunction?.constructor === JigMath.EquaFunction) {
+		var isFirstInBlob = equaBlob.params[0] === item.parent;
+		var isSetFunction = equaFunction.label?.name === 'set';
+		if (isFirstInBlob && isSetFunction) {
+			customVariables.push(item.name);
+			return true;
+		}
+	}
+}
+
+/**
  * Colors the equation
  * @param {Item} item
  * @param {HTMLSpanElement} span
  */
 function applyEquaDecoration(item, span) {
 	if (item.constructor === JigMath.EquaVariable) {
-		if (!['x', 'y', 'z', 't'].includes(item.name)) {
+		if (!isVariableDefined(item)) {
 			span.classList.add('equa_warning');
 			formuleReady = false;
 		}
@@ -566,7 +592,7 @@ function getPixelImgs(xImg, yImg, tImg) {
 			this, { xImg, yImg, tImg });
 	}
 	if (xImg < 0 || 8 <= xImg || yImg < 0 || 8 <= yImg) return 0;
-	return images8x8[tImg].getPixel(xImg, yImg);
+	return images8x8[tImg].getPixel(xImg, 7 - yImg);
 }
 
 function fillFrameWithFormule(systeme, t) {
@@ -574,15 +600,18 @@ function fillFrameWithFormule(systeme, t) {
 	systeme.setVariable('t', t);
 	for (let z = 0; z < 8; z++) {
 		systeme.setVariable('z', z);
+		systeme.setVariable('zM', z - 3.5);
 		for (let y = 0; y < 8; y++) {
 			systeme.setVariable('y', y);
+			systeme.setVariable('yM', y - 3.5);
 			for (let x = 0; x < 8; x++) {
 				systeme.setVariable('x', x);
+				systeme.setVariable('xM', x - 3.5);
 
 				var color = systeme.getValue();
 				if (isNaN(color) || typeof color !== 'number') {
 					console.log('Equation non valide', { x, y, z, t, color, systeme });
-					throw new Error(`L'équation n'est pas valide : ${color}`);
+					throw new Error(`L'équation n'est pas valide : ${color}\nSi des fonctions ne sont pas simplifiées, c'est parce que leurs contenu n'est pas valide.`);
 				}
 				frame[z][y][x] = color;
 			}
@@ -620,6 +649,7 @@ function generateFramesWithFormule() {
 
 	const start = Date.now();
 	var deltaLog = 0;
+	systeme.setVariable('tMax', tMax);
 	for (let t = 0; t < tMax; t++) {
 		frames[t] = fillFrameWithFormule(systeme, t);
 		if (Date.now() - deltaLog > 500) {
@@ -684,7 +714,7 @@ window.addEventListener('load', () => {
 	formule_input.addEventListener("mousedown", () => setTimeout(onFormuleCursorMoved, 1));
 	formule_input.addEventListener("keydown", () => setTimeout(onFormuleCursorMoved, 1));
 
-	formule_input.value = "f(x,y,z,t) = (x==0) && img(y,z,t)";
+	formule_input.value = "f(x,y,z,t) = (y==0) && img(x,z,t)";
 	onFormuleChanged();
 
 	updateButtonSubmit();

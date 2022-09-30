@@ -101,20 +101,14 @@ void WebServer::handleHttpRequest(struct mg_connection *c, struct mg_http_messag
 		struct mg_http_serve_opts opts = {}; // Serve local dir
 
 		std::string uri(hm->uri.ptr, hm->uri.len);
-		// every web files are in the /web folder
-		// they are accessible with /web/... or with /...
-		// i.e. /web/login or /login (or /web/login/index.html or /login/index.html)
-		// by default we use /web because of source code organization (html: <script src="/web/..."></script>)
+		// Every web files are in the /WEB/ folder (webFolder)
+		// they are accessible with /...
+		// i.e. /login (or /login/index.html)
 		// Every web files are available without authentication
 		// But the client has to authenticate with a Web Socket to send and get ledcube informations
-		if (uri.find("/web/") == 0) {
-			opts.root_dir = ".";
-		} else {
-			opts.root_dir = webFolder.c_str();
-			uri = "/web" + uri;
-		}
+		opts.root_dir = webFolder.c_str();
 
-		if (uri.find("/web/favicon.ico") == 0) return mg_http_serve_file(c, hm, std::string(webFolder + "favicon/favicon.ico").c_str(), &opts);
+		if (uri.find("/favicon.ico") == 0) return mg_http_serve_file(c, hm, std::string(webFolder + "favicon/favicon.ico").c_str(), &opts);
 
 		mg_http_serve_dir(c, hm, &opts);
 	}

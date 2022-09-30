@@ -13,6 +13,17 @@
 	<link rel="stylesheet" href="../../common/css/Main.css">
 
 	<script>var webFolder = '../../';</script>
+	<link rel="modulepreload" href="../../common/js/utils/ColorPicker.js">
+	<link rel="modulepreload" href="../../common/js/utils/EventEmitter.js">
+	<link rel="modulepreload" href="../../common/js/utils/frame.js">
+	<link rel="modulepreload" href="../../common/js/utils/notifications.js">
+	<link rel="modulepreload" href="../../common/js/viewer/cubeViewer.js">
+	<link rel="modulepreload" href="../../common/js/ws/LedCubeWS.js">
+	<link rel="modulepreload" href="../../common/js/ws/main.js">
+	<link rel="modulepreload" href="../../common/js/LEDCubeTools.js">
+	<link rel="modulepreload" href="../../common/js/main.js">
+	<link rel="modulepreload" href="./edit.js">
+	<link rel="modulepreload" href="./selectMatrix.js">
 	<script src="../../include/bcryptjs/dist/bcrypt.js"></script>
 	<script src="../../include/zip/pako.js"></script>
 	<script src="../../include/zip/base64.js"></script>
@@ -55,7 +66,7 @@
 			</div>
 			<div class="flexRow">
 				<p>Temps d'une frame (en ms)</p>
-				<input id="frameTime" onkeyup="module.changeFrameTime()" min="1" max="9999" type="number" value="500">
+				<input id="frameTime" onkeyup="module.changeFrameTime()" min="1" max="9999" type="number" value="50">
 			</div>
 			<div class="flexRow">
 				<button onclick="module.addFrameBefore()">Ajouter une frame avant</button>
@@ -69,7 +80,7 @@
 			<div class="flexRow">
 
 				<button onclick="module.previousFrame()">&lt;</button>
-				<input id="frameRange" oninput="module.goToFrame()" type="range" min="1" max="1" value="1">
+				<input id="frameRange" oninput="module.goToFrame(this.value)" type="range" min="1" max="1" value="1">
 				<button onclick="module.nextFrame()">&gt;</button>
 				<input class="inputnumfixedwidth" id="frameInput" type="number" oninput="document.getElementById('frameRange').value = Math.max(this.value, 1); module.gotoframe()"
 					min="1" max="1" value="1">

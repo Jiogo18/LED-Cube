@@ -14,6 +14,14 @@
 	<link rel='stylesheet' href='../../common/css/from_image.css'>
 
 	<script>var webFolder = '../../';</script>
+	<link rel="modulepreload" href="../../common/js/utils/ColorPicker.js">
+	<link rel="modulepreload" href="../../common/js/utils/EventEmitter.js">
+	<link rel="modulepreload" href="../../common/js/utils/frame.js">
+	<link rel="modulepreload" href="../../common/js/utils/notifications.js">
+	<link rel="modulepreload" href="../../common/js/viewer/cubeViewer.js">
+	<link rel="modulepreload" href="../../common/js/ws/LedCubeWS.js">
+	<link rel="modulepreload" href="../../common/js/ws/main.js">
+	<link rel="modulepreload" href="./from_image.js">
 	<script src="../../include/bcryptjs/dist/bcrypt.js"></script>
 	<script src="../../include/zip/pako.js"></script>
 	<script src="../../include/zip/base64.js"></script>
@@ -297,6 +305,21 @@
 							<tr>
 								<td>lumiere(c, lumiere))</td>
 								<td>Change le taux de luminosité de la couleur (1 = ne change pas)</td>
+							</tr>
+						</tbody>
+					</table>
+					<h3 dir="auto">Autres Fonctions</h3>
+					<table>
+						<thead>
+							<tr>
+								<th>Nom</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>set(nom, valeur)</td>
+								<td>Définit une variable avec une valeur (retourne 0)</td>
 							</tr>
 						</tbody>
 					</table>

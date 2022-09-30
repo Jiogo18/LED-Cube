@@ -66,6 +66,7 @@ input[type=range]:disabled {
 	overflow: hidden;
 	background-color: #3e4f51;
 	transition: background 0.1s;
+	resize: vertical;
 }
 
 #config_formule:not([disabled]) #formule_container:hover {
@@ -74,7 +75,6 @@ input[type=range]:disabled {
 
 #formule_input, #fill_formule {
 	padding: 8px;
-    border-radius: inherit;
 	font-family: 'consolas', monospace, -webkit-pictograph, 'fantasy';
     font-size: 18px;
 	letter-spacing: 2px;
@@ -83,8 +83,9 @@ input[type=range]:disabled {
 
 #formule_input {
 	position: absolute;
-	width: 100%;
-	height: 100%;
+	width: calc(100% - 16px);
+	height: calc(100% - 16px);
+	border: 0;
 	resize: none;
 	margin: 0;
 	color: rgba(232, 230, 227, .1);
@@ -95,10 +96,9 @@ input[type=range]:disabled {
 
 #fill_formule {
 	position: absolute;
-	width: calc(100% - 18px);
-	height: calc(100% - 18px);
+	width: calc(100% - 16px);
+	height: calc(100% - 16px);
 	color: rgb(232, 230, 227);
-	border: 1px solid transparent;
 	z-index: 1;
 	overflow: auto;
 	pointer-events: none;
