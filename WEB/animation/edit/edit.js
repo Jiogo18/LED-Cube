@@ -98,7 +98,6 @@ export function refresh2D() {
 }
 
 export function refresh3D() {
-	ledCubeTools.cubeViewer.animation.currentFrameIndex = selectedFrame - 1;
 	ledCubeTools.cubeViewer.refresh();
 	refresh2D();
 }
@@ -167,12 +166,8 @@ export function addFrame(index) {
 	dirty = true;
 	ledCubeTools.cubeViewer.animation.addFrame(index);
 
-	const framerange = document.getElementById("frameRange")
-	const frameinput = document.getElementById("frameInput")
-	if (index <= (selectedFrame - 1)) {
-		selectedFrame++;
-		framerange.value = selectedFrame
-		frameinput.value = selectedFrame
+	if (index < ledCubeTools.cubeViewer.animation.currentFrameIndex) {
+		nextFrame(false);
 	}
 	onframeschanged();
 }
@@ -183,47 +178,35 @@ export function removeFrame() {
 		return
 	}
 	dirty = true;
-	const framerange = document.getElementById("frameRange")
-	const frameinput = document.getElementById("frameInput")
-	const frame = framerange.value
-	let confirmremove = confirm('Voulez-vous supprimer la frame numéro ' + frame + ' ?')
+	const frameIndex = ledCubeTools.cubeViewer.animation.currentFrameIndex
+	let confirmremove = confirm('Voulez-vous supprimer la frame numéro ' + (frameIndex + 1) + ' ?')
 	if (confirmremove && getFrameCount() > 1) {
-		ledCubeTools.cubeViewer.animation.removeFrame(frame - 1);
-		if (frame > getFrameCount()) {
-			framerange.value = getFrameCount()
-			frameinput.value = getFrameCount()
-			selectedFrame = getFrameCount()
+		ledCubeTools.cubeViewer.animation.removeFrame(frameIndex);
+		if (frameIndex + 1 >= getFrameCount()) {
+			goToFrame(getFrameCount())
 		}
 		onframeschanged();
 	}
 }
 
-export function goToFrame() {
-	const framerange = document.getElementById("frameRange")
-	const frameinput = document.getElementById("frameInput")
-	if (framerange.value < 1) framerange.value = 1
-	if (framerange.value > getFrameCount()) framerange.value = getFrameCount()
-	selectedFrame = framerange.value
-	frameinput.value = framerange.value
-	refresh3D()
+export function goToFrame(frameIndex) {
+	frameIndex = Math.max(1, Math.min(frameIndex, getFrameCount()));
+	ledCubeTools.cubeViewer.animation.currentFrameIndex = frameIndex - 1;
+	ledCubeTools.cubeViewer.refresh();
 }
 
 export function nextFrame(loop = false) {
-	const frameRange = document.getElementById("frameRange")
-	if (loop && frameRange.value >= getFrameCount())
-		frameRange.value = 1
-	else
-		frameRange.value++
-	goToFrame()
+	if (loop || ledCubeTools.cubeViewer.animation.currentFrameIndex < getFrameCount() - 1) {
+		ledCubeTools.cubeViewer.animation.nextFrame();
+		ledCubeTools.cubeViewer.refresh();
+	}
 }
 
 export function previousFrame(loop = false) {
-	const frameRange = document.getElementById("frameRange")
-	if (loop && frameRange.value <= 1)
-		frameRange.value = getFrameCount()
-	else
-		frameRange.value--
-	goToFrame()
+	if (loop || ledCubeTools.cubeViewer.animation.currentFrameIndex > 0) {
+		ledCubeTools.cubeViewer.animation.previousFrame();
+		ledCubeTools.cubeViewer.refresh();
+	}
 }
 
 export function onframeschanged() {
@@ -240,6 +223,21 @@ export function onframeschanged() {
 	if (contentnum.value > FRAME_COUNT) contentnum.value = FRAME_COUNT
 	if (contentnumaf.value > FRAME_COUNT) contentnumaf.value = FRAME_COUNT
 	refresh3D()
+}
+
+/**
+ * Called by the CubeViewer when currentFrameIndex is changed
+ */
+export function onFrameChanged() {
+	const frameIndex = ledCubeTools.cubeViewer.animation.currentFrameIndex;
+	const framerange = document.getElementById("frameRange")
+	const frameinput = document.getElementById("frameInput")
+	if (frameIndex !== selectedFrame - 1) {
+		selectedFrame = frameIndex + 1;
+		framerange.value = selectedFrame
+		frameinput.value = selectedFrame
+	}
+	refresh2D();
 }
 
 var initDone = false;
@@ -262,6 +260,7 @@ export async function init() {
 	updateSaveButton()
 
 	ledCubeTools.addEventListener(ledCubeTools.EVENTS.PICKUP_COLOR, onColorPickedUp);
+	ledCubeTools.addEventListener(ledCubeTools.EVENTS.FRAMES_CHANGED, onFrameChanged);
 	initDone = true;
 }
 
@@ -525,8 +524,8 @@ export default {
 	setRadioSelectedValue,
 	addFrameBefore,
 	addFrameAfter,
-	goToFrame,
 	removeFrame,
+	goToFrame,
 	nextFrame,
 	previousFrame,
 	onframeschanged,

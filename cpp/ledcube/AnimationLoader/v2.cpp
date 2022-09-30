@@ -5,7 +5,7 @@
 bool AnimationLoaders::AnimationLoader_v2::isVersion(const std::string &data) {
 	std::regex versionRegex("^2\\s+[a-zA-Z0-9\\+/=]+$", std::regex_constants::ECMAScript | std::regex_constants::icase);
 
-	std::string dataCopy = data.length() > 26000 ? data.substr(0, 26000) : data;
+	std::string dataCopy = data.length() > 24000 ? data.substr(0, 24000) : data;
 	return std::regex_match(dataCopy, versionRegex);
 }
 

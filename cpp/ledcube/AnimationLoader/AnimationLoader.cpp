@@ -8,10 +8,10 @@
 #define AnimationSaver_Json AnimationLoaders::AnimationLoader_v2
 
 int AnimationLoaders::AnimationLoader::getVersionOf(const std::string &data) {
-	if (AnimationLoader_v1().isVersion(data)) {
-		return 1;
-	} else if (AnimationLoader_v2().isVersion(data)) {
+	if (AnimationLoader_v2().isVersion(data)) {
 		return 2;
+	} else if (AnimationLoader_v1().isVersion(data)) {
+		return 1;
 	} else {
 		throw std::invalid_argument("Unknown version");
 		return -1;

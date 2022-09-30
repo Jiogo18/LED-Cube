@@ -14,6 +14,13 @@
 	<link rel="stylesheet" href="../common/css/Main.css">
 
 	<script>var webFolder = '../';</script>
+	<link rel="modulepreload" href="../common/js/utils/ColorPicker.js">
+	<link rel="modulepreload" href="../common/js/utils/EventEmitter.js">
+	<link rel="modulepreload" href="../common/js/utils/frame.js">
+	<link rel="modulepreload" href="../common/js/utils/notifications.js">
+	<link rel="modulepreload" href="../common/js/viewer/cubeViewer.js">
+	<link rel="modulepreload" href="../common/js/ws/LedCubeWS.js">
+	<link rel="modulepreload" href="../common/js/ws/main.js">
 	<script src="../include/bcryptjs/dist/bcrypt.js"></script>
 	<script>var ledcube, ledcubeRequests;</script>
 	<script type="module">import { ledcubeWS, requests } from '../common/js/ws/main.js'; ledcube = ledcubeWS; ledcubeRequests = requests;</script>

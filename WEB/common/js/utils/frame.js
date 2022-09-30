@@ -155,6 +155,12 @@ export class LEDAnimation {
 			this.currentFrameIndex = 0;
 	}
 
+	previousFrame() {
+		this.currentFrameIndex--;
+		if (this.currentFrameIndex < 0)
+			this.currentFrameIndex = this.frames.length - 1;
+	}
+
 	/**
 	 * @param {number} index
 	 */
