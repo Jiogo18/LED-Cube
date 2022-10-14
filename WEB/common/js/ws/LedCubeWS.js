@@ -548,6 +548,17 @@ export class LedCubeWS extends EventEmitter {
 					this.deny();
 					callback?.(false);
 				});
+
+				setTimeout(() => {
+					if (!div.checkVisibility()) {
+						// Popup is not visible, so we can't ask for consent
+						removePopup();
+						callback?.(null);
+					}
+				}, 200);
+			}
+			else {
+				callback(true);
 			}
 		},
 
