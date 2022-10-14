@@ -44,7 +44,7 @@ export class LedCubeWS extends EventEmitter {
 	}
 
 	loggoff() {
-		localStorage.clear();
+		this.cookies.removeAuth();
 		this.logging = false;
 	}
 
@@ -214,7 +214,9 @@ export class LedCubeWS extends EventEmitter {
 			get_raspberry_status: () => this.sendAndWaitAnswer('status', {}),
 			get_ledcube_status: () => this.sendAndWaitAnswer('ledcube', { action: 'status' }),
 			subscribe_changes: (subscribe) => this.sendAndWaitAnswer('ledcube', { action: 'status.subscribe', subscribe }),
-		}
+		},
+
+		stopProcess: () => this.sendAndWaitAnswer('command', { args: 'stop' }),
 	}
 
 	/** @param {Promise<>} promise @param {string} messageSuccess */
@@ -254,7 +256,9 @@ export class LedCubeWS extends EventEmitter {
 
 			/** @param {string} fileName @returns {Promise<{success:boolean}>} */
 			delete: (fileName) => this.#sendLedCubeWithBasicNotification(this.sendLedcube.animation.delete(fileName), 'Animation supprimée'),
-		}
+		},
+
+		stopProcess: () => this.#sendLedCubeWithBasicNotification(this.sendLedcube.stopProcess(), 'Arrêt demandé'),
 	}
 
 	notifications = {
@@ -409,7 +413,7 @@ export class LedCubeWS extends EventEmitter {
 	#whenLoggedIn(clientId) {
 		this.is_connected = true;
 		this.clientId = clientId;
-		localStorage.setItem('sid', this.clientId);
+		this.cookies.setItem('sid', this.clientId);
 		document.body.setAttribute('connected', 'true');
 	}
 
@@ -418,63 +422,198 @@ export class LedCubeWS extends EventEmitter {
 		document.body.setAttribute('connected', 'false');
 	}
 
-	/**
-	 * Store the animation in the local storage
-	 * @param {LEDAnimation} animation
-	 */
-	storeAnimationLocal(animation) {
-		const animationData = this.encodeAnimation(animation);
-		const key = 'animation_' + Date.now();
-		var added = false;
-		do {
-			try {
-				localStorage.setItem(key, animationData);
-				added = true;
-			}
-			catch (e) {
-				// Remove 5 oldest animations
-				const keys = Object.keys(localStorage).filter(k => k.startsWith('animation_'));
-				keys.sort();
-				if (keys.length == 0) {
-					throw e; // There is not enough space to store the animation
-				}
-				for (let i = 0; i < 5 && i < keys.length; i++) {
-					localStorage.removeItem(keys[i]);
-				}
-			}
-		} while (!added);
-		return key;
-	}
+	cookies = {
 
-	/**
-	 * Open the editor with the given animation key
-	 * @param {string} key
-	 * @param {{submit_blank: boolean}} options
-	 */
-	editAnimationLocal(key, options) {
-		const url = webFolder + 'animation/edit/?local_key=' + key;
-		if (options?.submit_blank) {
-			window.open(url, '_blank'); // Open in new tab
-		}
-		else {
-			document.location.href = url;
-		}
-	}
+		getLedCubeWS: () => this,
 
-	/**
-	 * A local animation stored in the local storage to save it between editor pages
-	 * @param {string} key
-	 */
-	getAnimationLocal(key) {
-		const animationData = localStorage.getItem(key);
-		if (animationData) {
-			return this.decodeAnimation(animationData);
-		}
-		return null;
+		areAllowed() {
+			return navigator.cookieEnabled && localStorage.getItem('cookies') == 'allowed';
+		},
+
+		/**
+		 * @param {string} message
+		 * @param {Function} callback First parameter is true if cookies are allowed
+		 */
+		ask(message, callback) {
+			if (!this.areAllowed()) {
+				let div = document.createElement('div');
+				div.classList.add('cookies-popup');
+				div.classList.add('consent-popup');
+
+				message ??= 'Les cookies sont nécessaires pour se connecter';
+				let p1 = document.createElement('p');
+				p1.innerText = message;
+				div.appendChild(p1);
+				let p2 = document.createElement('p');
+				p2.innerText = 'Autoriser les cookies ?';
+				div.appendChild(p2);
+				let a = document.createElement('a');
+				a.innerText = "Plus d'informations";
+				a.href = webFolder + 'cookie';
+				div.appendChild(a);
+
+				let buttonAllow = document.createElement('button');
+				buttonAllow.innerText = 'Autoriser';
+				buttonAllow.id = 'cookies-allow';
+				let buttonDeny = document.createElement('button');
+				buttonDeny.innerText = 'Refuser';
+				buttonDeny.id = 'cookies-deny';
+				let divButtons = document.createElement('div');
+				divButtons.appendChild(buttonAllow);
+				divButtons.appendChild(buttonDeny);
+				div.appendChild(divButtons);
+
+				document.body.appendChild(div);
+
+				function removePopup() {
+					buttonAllow.disabled = true;
+					buttonDeny.disabled = true;
+					div.style.opacity = '0';
+					setTimeout(() => div.remove(), 500);
+				}
+
+				buttonAllow.addEventListener('click', () => {
+					removePopup();
+					this.allow();
+					callback?.(true);
+				});
+				buttonDeny.addEventListener('click', () => {
+					removePopup();
+					this.deny();
+					callback?.(false);
+				});
+			}
+		},
+
+		allow() {
+			localStorage.setItem('cookies', 'allowed');
+		},
+
+		deny() {
+			localStorage.setItem('cookies', 'denied');
+		},
+
+		removeAll() {
+			while (localStorage.length > 0) {
+				localStorage.removeItem(localStorage.key(0));
+			}
+		},
+
+		removeNonUseful() {
+			const keys = this.getStoredAnimationsNames();
+			for (const key of keys) {
+				localStorage.removeItem(key);
+			}
+		},
+
+		/**
+		 * @param {string} key
+		 * @param {string} value
+		 */
+		setItem(key, value) {
+			if (this.areAllowed()) {
+				localStorage.setItem(key, value);
+			}
+		},
+
+		/**
+		 * @param {string} key
+		 */
+		getItem(key) {
+			if (this.areAllowed()) {
+				return localStorage.getItem(key);
+			}
+			return null;
+		},
+
+		/**
+		 * @param {string} key
+		 */
+		removeItem(key) {
+			localStorage.removeItem(key);
+		},
+
+		getAuth() {
+			return { cc: this.getItem('cc'), ck: this.getItem('ck'), sid: this.getItem('sid') };
+		},
+
+		removeAuth() {
+			this.removeItem('cc');
+			this.removeItem('ck');
+			this.removeItem('sid');
+		},
+
+		getStoredAnimationsNames() {
+			const keys = Object.keys(localStorage).filter(k => k.startsWith('animation_'));
+			keys.sort();
+			return keys;
+		},
+
+		/**
+		 * Store the animation in the local storage
+		 * @param {LEDAnimation} animation
+		 */
+		storeAnimationLocal(animation) {
+			if (!this.areAllowed()) return;
+
+			const animationData = this.getLedCubeWS().encodeAnimation(animation);
+			const key = 'animation_' + Date.now();
+			var added = false;
+			do {
+				try {
+					this.setItem(key, animationData);
+					added = true;
+				}
+				catch (e) {
+					// Remove 5 oldest animations
+					const keys = this.getStoredAnimationsNames();
+					if (keys.length == 0) {
+						throw e; // There is not enough space to store the animation
+					}
+					for (let i = 0; i < 5 && i < keys.length; i++) {
+						this.removeItem(keys[i]);
+					}
+				}
+			} while (!added);
+			return key;
+		},
+
+		/**
+		 * Open the editor with the given animation key
+		 * @param {string} key
+		 * @param {{submit_blank: boolean}} options
+		 */
+		editAnimationLocal(key, options) {
+			if (!this.areAllowed()) return;
+
+			const url = webFolder + 'animation/edit/?local_key=' + key;
+			if (options?.submit_blank) {
+				window.open(url, '_blank'); // Open in new tab
+			}
+			else {
+				document.location.href = url;
+			}
+		},
+
+		/**
+		 * A local animation stored in the local storage to save it between editor pages
+		 * @param {string} key
+		 */
+		getAnimationLocal(key) {
+			if (!this.areAllowed()) return null;
+
+			const animationData = this.getItem(key);
+			if (animationData) {
+				return this.getLedCubeWS().decodeAnimation(animationData);
+			}
+			return null;
+		},
+
 	}
 
 	/**
 	 * A cached version of the server's animations to avoid requesting them multiple times
+	 * A cached animation is temporary and isn't stored in cookies
 	 * @type {LEDAnimation[]}
 	 */
 	cachedAnimations = [];

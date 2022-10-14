@@ -39,14 +39,99 @@ function inputKeyDown(e) {
 	}
 }
 
+/**
+ * @param {Function} callback
+ */
+function askCookies(callback) {
+	let loginForm = document.querySelector('#loginForm');
+
+	// Remove inputs by translating them out of the screen
+	/** @type {HTMLDivElement[]} */
+	let loginInputs = loginForm.querySelectorAll('.input-field');
+	loginInputs[0].style.transform = 'translateX(-200%)';
+	loginInputs[1].style.transform = 'translateX(200%)';
+
+	// Reduce the size of the login button and remove the text
+	/** @type {HTMLDivElement} */
+	let loginButtonDiv = loginForm.querySelector('#button-login');
+	let loginButton = loginButtonDiv.querySelector('button');
+
+	// Add the deny button
+	let buttonDeny = document.createElement('button');
+	buttonDeny.innerText = 'Refuser';
+	buttonDeny.classList.add('cookies-deny');
+	buttonDeny.type = 'button';
+	buttonDeny.style.width = '0%';
+	buttonDeny.style.opacity = 0;
+	console.log(loginButtonDiv.appendChild(buttonDeny));
+	// Grow
+	setTimeout(() => buttonDeny.style.removeProperty('width'), 1);
+
+	function removeButtons() {
+		buttonDeny.disabled = true;
+		loginButton.disabled = true;
+	}
+
+	loginButton.onclick = event => {
+		removeButtons();
+		event.stopImmediatePropagation();
+		ledcubeWS.cookies.allow();
+		callback();
+	}
+	buttonDeny.onclick = event => {
+		removeButtons();
+		event.stopImmediatePropagation();
+		ledcubeWS.cookies.deny();
+		callback();
+	}
+	loginButton.style.opacity = 0;
+	loginButton.classList.add('cookies-allow');
+	setTimeout(() => {
+		loginButton.textContent = 'Autoriser';
+		loginButton.style.removeProperty('opacity');
+		buttonDeny.style.removeProperty('opacity');
+	}, 500);
+
+	let divMessage = document.createElement('div');
+	let p1 = document.createElement('p');
+	p1.innerText = 'Les cookies sont nécessaires pour se connecter';
+	let p2 = document.createElement('p');
+	p2.innerText = 'Voulez-vous autoriser les cookies ?';
+	let a = document.createElement('a');
+	a.innerText = "Plus d'informations";
+	a.href = webFolder + 'cookie';
+	divMessage.appendChild(p1);
+	divMessage.appendChild(p2);
+	divMessage.appendChild(a);
+	divMessage.id = 'cookies-message';
+
+	loginForm.insertBefore(divMessage, loginInputs[0]);
+}
+
 function loginLedCube() {
+	if (!ledcubeWS.cookies.areAllowed()) {
+		askCookies(() => {
+			if (!ledcubeWS.cookies.areAllowed()) {
+				alert('Les cookies sont nécessaires pour se connecter, redirection à la page d\'accueil');
+				window.location.href = webFolder;
+			}
+			else {
+				loginLedCube();
+			}
+		});
+		return;
+	}
+	alert("Login is disabled on this website");
+	onLogged();
+	return;
 	const clientChallenge = dcodeIO.bcrypt.genSaltSync();
 	const username = document.querySelector('#username').value;
 	const password = document.querySelector('#pswrd').value;
 	const cookieKey = dcodeIO.bcrypt.hashSync(password, clientChallenge);
-	localStorage.setItem('ck', cookieKey);
-	localStorage.setItem('cc', clientChallenge);
-	localStorage.setItem('sid', '');
+
+	ledcubeWS.cookies.setItem('ck', cookieKey);
+	ledcubeWS.cookies.setItem('cc', clientChallenge);
+	ledcubeWS.cookies.setItem('sid', '');
 	console.log('connecting...', { clientChallenge, cookieKey });
 	ledcubeWS.connect();
 }
@@ -77,7 +162,11 @@ function onLogged() {
 
 	// redirect
 	setTimeout(() => {
-		localStorage.setItem('comeFromLogin', '1');
+		if (!ledcubeWS.cookies.areAllowed()) {
+			window.location.href = webFolder;
+			return;
+		}
+		ledcubeWS.cookies.setItem('comeFromLogin', '1');
 		window.history.back();
 		setTimeout(() => {
 			window.location.href = webFolder;
@@ -93,4 +182,5 @@ export default {
 	onWrongPassword,
 	onAuthCancel,
 	onLogged,
+	askCookies,
 };

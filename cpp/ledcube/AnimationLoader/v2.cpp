@@ -14,7 +14,9 @@ Animation *AnimationLoaders::AnimationLoader_v2::loadAnimation(std::istream &str
 	std::string data;
 	std::getline(stream, version, ' ');
 	std::getline(stream, data);
-	_ASSERT_EXPR(isVersion(version + " " + data), "Invalid animation data");
+	if (!isVersion(version + " " + data)) {
+		throw std::invalid_argument("Invalid animation data");
+	}
 
 	// decompress data
 	JsonReader document;
@@ -70,31 +72,31 @@ bool AnimationLoaders::AnimationLoader_v2::saveAnimation(const Animation *animat
 Animation *AnimationLoaders::AnimationLoader_v2::jsonToAnimation(const JsonReader &document) {
 	// get version
 	if (!document.HasMember("version") || !document["version"].IsInt()) {
-		std::cerr << "Invalid animation data (no version)" << std::endl;
-		return nullptr;
+		throw std::invalid_argument("Invalid animation data (no version)");
 	}
 	int version = document["version"].GetInt();
-	_ASSERT_EXPR(version == 2, "AnimationLoader_v2::loadAnimation: version mismatch");
+	if (version != 2) {
+		throw std::invalid_argument("Invalid animation data (wrong version)");
+	}
 
 	// get content type
 	if (!document.HasMember("contentType") || !document["contentType"].IsString()) {
-		std::cerr << "Invalid animation data (no contentType)" << std::endl;
-		return nullptr;
+		throw std::invalid_argument("Invalid animation data (no content type)");
 	}
 	std::string contentType = document["contentType"].GetString();
-	_ASSERT_EXPR(contentType == "animation", "AnimationLoader_v2::loadAnimation: content type mismatch");
+	if (contentType != "animation") {
+		throw std::invalid_argument("Invalid animation data (wrong content type)");
+	}
 
 	// get frame count
 	if (!document.HasMember("frameCount") || !document["frameCount"].IsInt()) {
-		std::cerr << "Invalid animation data (no frame count)" << std::endl;
-		return nullptr;
+		throw std::invalid_argument("Invalid animation data (no frame count)");
 	}
 	int frameCount = document["frameCount"].GetInt();
 
 	// get frame duration
 	if (!document.HasMember("frameDuration") || !document["frameDuration"].IsInt()) {
-		std::cerr << "Invalid animation data (no frame duration)" << std::endl;
-		return nullptr;
+		throw std::invalid_argument("Invalid animation data (no frame duration)");
 	}
 	int frameDuration = document.getInt("frameDuration", 50);
 
@@ -103,8 +105,7 @@ Animation *AnimationLoaders::AnimationLoader_v2::jsonToAnimation(const JsonReade
 
 	// get frame data
 	if (!document.HasMember("frames") || !document["frames"].IsArray()) {
-		std::cerr << "Invalid animation data (no frames)" << std::endl;
-		return nullptr;
+		throw std::invalid_argument("Invalid animation data (no frames)");
 	}
 	const rapidjson::Value &frames = document["frames"];
 
@@ -126,16 +127,19 @@ Animation *AnimationLoaders::AnimationLoader_v2::jsonToAnimation(const JsonReade
 Frame *AnimationLoaders::AnimationLoader_v2::jsonToFrame(const JsonReader &document) {
 	// get version
 	int version = document.HasMember("version") && document["version"].IsInt() ? document["version"].GetInt() : 0;
-	_ASSERT_EXPR(version == 2, "AnimationLoader_v2::loadFrame: version mismatch");
+	if (version != 2) {
+		throw std::invalid_argument("Invalid frame data (wrong version)");
+	}
 
 	// get content type
 	std::string contentType = document.HasMember("contentType") && document["contentType"].IsString() ? document["contentType"].GetString() : "";
-	_ASSERT_EXPR(contentType == "frame", "AnimationLoader_v2::loadFrame: content type mismatch");
+	if (contentType != "frame") {
+		throw std::invalid_argument("Invalid frame data (wrong content type)");
+	}
 
 	// get frame data
 	if (!document.HasMember("layers") || !document["layers"].IsArray()) {
-		std::cerr << "Invalid frame data (no layers)" << std::endl;
-		return nullptr;
+		throw std::invalid_argument("Invalid frame data (no layers)");
 	}
 	const rapidjson::Value &layers = document["layers"];
 
@@ -145,16 +149,19 @@ Frame *AnimationLoaders::AnimationLoader_v2::jsonToFrame(const JsonReader &docum
 int **AnimationLoaders::AnimationLoader_v2::jsonToLayer(const JsonReader &document) {
 	// get version
 	int version = document.HasMember("version") && document["version"].IsInt() ? document["version"].GetInt() : 0;
-	_ASSERT_EXPR(version == 2, "AnimationLoader_v2::loadLayer: version mismatch");
+	if (version != 2) {
+		throw std::invalid_argument("Invalid layer data (wrong version)");
+	}
 
 	// get content type
 	std::string contentType = document.HasMember("contentType") && document["contentType"].IsString() ? document["contentType"].GetString() : "";
-	_ASSERT_EXPR(contentType == "layer", "AnimationLoader_v2::loadLayer: content type mismatch");
+	if (contentType != "layer") {
+		throw std::invalid_argument("Invalid layer data (wrong content type)");
+	}
 
 	// get layer data
 	if (!document.HasMember("lines") || !document["lines"].IsArray()) {
-		std::cerr << "Invalid layer data (no data)" << std::endl;
-		return nullptr;
+		throw std::invalid_argument("Invalid layer data (no lines)");
 	}
 	const rapidjson::Value &lines = document["lines"];
 

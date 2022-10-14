@@ -45,7 +45,8 @@
 		<div class="header-buttons">
 			<a id="login" class="button" href="../login"><button class="blue">Se connecter</button></a>
 			<a id="logout" class="button" href="../logout"><button class="blue">Se déconnecter</button></a>
-			<button class="stopButton red" onclick="module.ledCubeTools.ledcubeWS.sendLedCubeWithNotification.animation.stop()"></button>
+			<button class="stopButton red" onclick="module.ledCubeTools.ledcubeWS.sendLedCubeWithNotification.animation.stop()"
+				ondblclick="module.ledCubeTools.ledcubeWS.sendLedCubeWithNotification.stopProcess()"></button>
 		</div>
 	</div>
 

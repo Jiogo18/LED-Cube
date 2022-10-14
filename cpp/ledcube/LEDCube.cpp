@@ -13,6 +13,8 @@ LEDCube::LEDCube()
 
 LEDCube::~LEDCube() {
 	if (sender != nullptr) {
+		sender->stop();
+		sender->join();
 		delete sender;
 		sender = nullptr;
 	}
@@ -23,6 +25,20 @@ LEDCube::~LEDCube() {
 	if (frame_index != nullptr) {
 		delete frame_index;
 		frame_index = nullptr;
+	}
+}
+
+void LEDCube::stop() {
+	Thread::stop();
+	if (sender != nullptr) {
+		sender->stop();
+	}
+}
+
+void LEDCube::join() {
+	Thread::join();
+	if (sender != nullptr) {
+		sender->join();
 	}
 }
 
@@ -163,21 +179,21 @@ void LEDCube::setLayer(int **colors, int layerIndex, int direction) {
 	case 0:
 		for (i = 0; i < YLENGTH; ++i) {
 			for (j = 0; j < ZLENGTH; ++j) {
-				setLed(layerIndex, i, j, colors[i][j]);
+				setLed(layerIndex, i, j, colors[j][i]);
 			}
 		}
 		break;
 	case 1:
 		for (i = 0; i < XLENGTH; ++i) {
 			for (j = 0; j < ZLENGTH; ++j) {
-				setLed(i, layerIndex, j, colors[i][j]);
+				setLed(i, layerIndex, j, colors[j][i]);
 			}
 		}
 		break;
 	case 2:
-		for (i = 0; i < YLENGTH; ++i) {
-			for (j = 0; j < XLENGTH; ++j) {
-				setLed(j, i, layerIndex, colors[i][j]);
+		for (i = 0; i < XLENGTH; ++i) {
+			for (j = 0; j < YLENGTH; ++j) {
+				setLed(i, j, layerIndex, colors[j][i]);
 			}
 		}
 		break;

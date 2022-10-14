@@ -27,6 +27,8 @@ public:
 	int MIN_TIME_BETWEEN_RANDOM_ANIMATIONS = 10000;
 	LEDCube();
 	~LEDCube();
+	void stop();
+	void join();
 
 	Animation *loadAnimation(std::string fileName) const;
 	bool playAnimation(std::string fileName);

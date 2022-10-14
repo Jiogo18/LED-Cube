@@ -228,8 +228,21 @@ async function sendMatrice(options) {
  */
 function submitPattern(frames, options) {
 	const animation = LEDAnimation.fromDecimalArrays(frames);
-	const key = ledcubeWS.storeAnimationLocal(animation);
-	ledcubeWS.editAnimationLocal(key, options);
+
+	if (!ledcubeWS.cookies.areAllowed()) {
+		ledcubeWS.cookies.ask("Les cookies sont nécessaires afin d'enregistrer temporairement l'animation.", (allowed) => {
+			if (allowed) {
+				submitPattern(frames, options);
+			}
+			else {
+				alert("Les cookies sont nécessaires pour continuer.");
+			}
+		});
+		return;
+	}
+
+	const key = ledcubeWS.cookies.storeAnimationLocal(animation);
+	ledcubeWS.cookies.editAnimationLocal(key, options);
 }
 
 function loadImages() {

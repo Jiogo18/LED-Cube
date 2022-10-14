@@ -24,11 +24,16 @@ public:
 	}
 	void run() {
 		wServ->join();
+		cubeManager->stop();
 		cubeManager->join();
 	}
 	void stop() {
 		wServ->stop();
 		cubeManager->stop();
+	}
+
+	Thread *getServerThread() {
+		return wServ;
 	}
 
 private:
@@ -68,7 +73,7 @@ int main(int argc, char **argv) {
 	app = new App();
 
 #ifdef _WIN32
-	int ret = window.process();
+	int ret = window.process(app->getServerThread());
 	app->stop();
 	delete app;
 	app = nullptr;

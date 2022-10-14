@@ -289,7 +289,7 @@ export async function onLogged() {
 			}
 		}
 		else if (animationLocalKey) {
-			const animation = ledCubeTools.ledcubeWS.getAnimationLocal(animationLocalKey);
+			const animation = ledCubeTools.ledcubeWS.cookies.getAnimationLocal(animationLocalKey);
 			if (animation) {
 				ledCubeTools.cubeViewer.animation = animation;
 				document.getElementById("fileName").value = animation.name;

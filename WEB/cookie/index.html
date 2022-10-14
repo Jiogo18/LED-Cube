@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+	<link rel="manifest" href="../favicon/site.webmanifest">
+
+	<title>LEDCube</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" href="../common/css/Main.css">
+	<link rel="stylesheet" href="cookie.css">
+
+	<script>var webFolder = '../';</script>
+	<link rel="modulepreload" href="../common/js/utils/ColorPicker.js">
+	<link rel="modulepreload" href="../common/js/utils/EventEmitter.js">
+	<link rel="modulepreload" href="../common/js/utils/frame.js">
+	<link rel="modulepreload" href="../common/js/utils/notifications.js">
+	<link rel="modulepreload" href="../common/js/viewer/cubeViewer.js">
+	<link rel="modulepreload" href="../common/js/ws/LedCubeWS.js">
+	<link rel="modulepreload" href="../common/js/ws/main.js">
+	<link rel="modulepreload" href="../common/js/LEDCubeTools.js">
+	<link rel="modulepreload" href="../common/js/main.js">
+	<link rel="modulepreload" href="./cookie.js">
+	<script src="../include/bcryptjs/dist/bcrypt.js"></script>
+	<script src="../include/zip/pako.js"></script>
+	<script src="../include/zip/base64.js"></script>
+
+	<script src="../common/js/viewer/three.min.js"></script>
+	<script src="../common/js/viewer/Detector.js"></script>
+	<script src="../common/js/viewer/OrbitControls.js"></script>
+	<script src="../common/js/viewer/Viewerscript.js"></script>
+	<script>var module = {};</script>
+	<script type="module">import m from './cookie.js'; module = m;</script>
+</head>
+
+
+<body>
+
+	<div class="header">
+		<h1><a href="../">LED CUBE</a></h1>
+		<div class="header-buttons">
+			<a id="login" class="button" href="../login"><button class="blue">Se connecter</button></a>
+			<a id="logout" class="button" href="../logout"><button class="blue">Se déconnecter</button></a>
+			<button class="stopButton red" onclick="module.ledcubeWS.sendLedCubeWithNotification.animation.stop()"></button>
+		</div>
+	</div>
+
+	<div class="content">
+		<div class="contentviewer fixedwidth widget" id="raspberrypi_status">
+			<h1 class="title">Informations sur les données personnelles</h1>
+			<div class="widget-core">
+				<p>Ce site utilise les Cookies pour :</p>
+
+				<div>
+					<h2>Cookies de préférence</h2>
+					<p>Nous utilisons les cookies afin d'enregistrer l'autorisation d'utiliser les cookies (obligatoire)</p>
+				</div>
+
+				<div>
+					<h2>Cookies de fonctionnement</h2>
+					<p>Nous utilisons les cookies afin d'enregistrer les informations de connexion</p>
+				</div>
+
+				<div>
+					<h2>Cookies supplémentaires</h2>
+					<p>Nous utilisons les cookies afin d'enregistrer temporairement les animations créées par l'utilisateur</p>
+				</div>
+
+				<div class="preference_buttons">
+					<p>Vous pouvez à tout moment <button onclick="module.removeAll()">supprimer les cookies</button></p>
+					<p><button onclick="module.removeNonUseful()">Supprimer les cookies temporaires</button></p>
+					<p>Les cookies sont actuellement <span id="cookie_state">Refusés</span>
+						<button onclick="module.toggleCookies()" id="cookie_button">Autoriser les cookies</button>
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="contentviewer fixedwidth widget" id="ledcube_status">
+			<h1 class="title">Cookies actuels</h1>
+			<div class="widget-core">
+				<ul id="cookies_list">
+				</ul>
+			</div>
+		</div>
+	</div>
+
+
+	<table id="contentnotifs"></table>
+</body>
+
+
+</html>
