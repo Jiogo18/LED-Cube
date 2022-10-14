@@ -7,13 +7,14 @@
 #include <windows.h>
 #include <wingdi.h>
 #include "../ledcube/Frame.h"
+#include "../Thread.h"
 
 class LedCubeWindow
 {
 public:
 	LedCubeWindow(HINSTANCE hInstance, int nShowCmd);
 	~LedCubeWindow();
-	int WINAPI process();
+	int WINAPI process(Thread *serverThread);
 	static void setFrame(const Frame *frame);
 	static int getFrameDelay();
 

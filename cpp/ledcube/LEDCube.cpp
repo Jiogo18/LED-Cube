@@ -13,6 +13,8 @@ LEDCube::LEDCube()
 
 LEDCube::~LEDCube() {
 	if (sender != nullptr) {
+		sender->stop();
+		sender->join();
 		delete sender;
 		sender = nullptr;
 	}
@@ -23,6 +25,20 @@ LEDCube::~LEDCube() {
 	if (frame_index != nullptr) {
 		delete frame_index;
 		frame_index = nullptr;
+	}
+}
+
+void LEDCube::stop() {
+	Thread::stop();
+	if (sender != nullptr) {
+		sender->stop();
+	}
+}
+
+void LEDCube::join() {
+	Thread::join();
+	if (sender != nullptr) {
+		sender->join();
 	}
 }
 

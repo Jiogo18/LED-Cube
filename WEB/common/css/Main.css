@@ -75,6 +75,10 @@ table {
 .header .button, .header-buttons > button {
     margin-left: 1em;
 }
+.header .shadow-text {
+    margin-right: 1em;
+    opacity: 0.2;
+}
 
 #cube_container {
     position: absolute;
@@ -185,6 +189,7 @@ svg {
 
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
     -webkit-appearance: none;
+    appearance: none;
     margin: 0;
 }
 
@@ -213,6 +218,7 @@ input[type=number]:hover:not(:disabled) {
 
 input[type=number] {
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 input[type=number]:disabled {
@@ -266,7 +272,7 @@ a.button {
 	display: flex;
 }
 
-.contentviewer a {
+a {
     color: #e8e6e3;
 	text-decoration: none;
 	border-bottom: 1px solid transparent;
@@ -278,8 +284,12 @@ a.button {
     display: flex;
 }
 
-.contentviewer a:hover:not(.button) {
+a:hover:not(.button) {
 	border-bottom-color: #e8e6e3;
+}
+
+h1 > a:hover:not(.button) {
+    border-bottom-color: transparent;
 }
 
 div.buttons {
@@ -313,6 +323,7 @@ body[connected="true"] a#logout {
 
 input[type=range] {
     -webkit-appearance: none;
+    appearance: none;
     border-radius: 25px;
     background: #3e4f51;
     outline: none;
@@ -804,3 +815,26 @@ code {
     margin-top: 24px;
     margin-bottom: 16px;
 }
+
+.cookies-popup {
+    z-index: 1000;
+    position: fixed;
+    width: 30em;
+    height: 20em;
+    top: calc(50% - 10em);
+    bottom: calc(50% - 10em);
+    left: calc(50% - 15em);
+    right: calc(50% - 15em);
+
+    background:rgb(48, 52, 54);
+    border-radius: 10px;
+    border:  rgb(62, 67, 70)  solid 4px;
+    opacity: 0.99;
+    transition: 0.5s;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+

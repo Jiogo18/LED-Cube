@@ -69,10 +69,10 @@
 				let animation = ledcube.decodeAnimation(data);
 
 				// enregistrer en local
-				let key = ledcube.storeAnimationLocal(animation);
+				let key = ledcube.cookies.storeAnimationLocal(animation);
 
 				// redirect to the edit page
-				ledcube.editAnimationLocal(key);
+				ledcube.cookies.editAnimationLocal(key);
 			}
 		}
 

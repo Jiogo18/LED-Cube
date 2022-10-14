@@ -13,9 +13,7 @@ else {
 
 function loggedOut() {
 	// remove session cookie and logout from ledcube
-	localStorage.removeItem('ck');
-	localStorage.removeItem('cc');
-	localStorage.removeItem('sid');
+	ledcube.cookies.removeAuth();
 
 	// redirect to main page
 	window.location.href = webFolder;

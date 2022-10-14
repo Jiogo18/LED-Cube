@@ -79,10 +79,10 @@ LedCubeWindow::~LedCubeWindow() {
 	std::cout << "[LedCubeWindow] Stopped!" << std::endl;
 }
 
-int WINAPI LedCubeWindow::process() {
+int WINAPI LedCubeWindow::process(Thread *serverThread) {
 	// Run the message loop.
 	MSG msg = {};
-	while (GetMessage(&msg, NULL, 0, 0)) {
+	while (GetMessage(&msg, NULL, 0, 0) && serverThread->canRun()) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}

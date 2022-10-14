@@ -1,0 +1,13 @@
+h2 {
+	text-align: center;
+	margin-left: 1em;
+	margin-right: 1em;
+}
+
+h2 ~ p {
+	font-size: 1em;
+}
+
+div.preference_buttons > p {
+	font-size: 1em;
+}
