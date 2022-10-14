@@ -231,6 +231,12 @@ function submitPattern(frames, options) {
 
 	if (!ledcubeWS.cookies.areAllowed()) {
 		ledcubeWS.cookies.ask("Les cookies sont nécessaires afin d'enregistrer temporairement l'animation.", (allowed) => {
+			if (allowed === null) {
+				allowed = confirm("Les cookies sont nécessaires afin d'enregistrer temporairement l'animation. Acceptez-vous l'enregistrement ?");
+				if (allowed) {
+					ledcubeWS.cookies.allow();
+				}
+			}
 			if (allowed) {
 				submitPattern(frames, options);
 			}
