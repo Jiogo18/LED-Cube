@@ -132,9 +132,9 @@ export class LedCubeWS extends EventEmitter {
 
 			/** @param {string} fileName @returns {Promise<{animation: LEDAnimation}>} */
 			get: async (fileName) => {
-				// Get the content of '/web/animations/fileName' with a GET request
+				// Get the content of '/animations/fileName' with a GET request
 				if (!fileName) return { success: false };
-				const response = await fetch(webFolder + 'animations/' + fileName);
+				const response = await fetch(webFolder + '../animations/' + fileName);
 				response.success = response.ok;
 				const reader = response.body.getReader();
 				const uint8Array = await reader.read();
