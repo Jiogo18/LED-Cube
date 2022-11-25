@@ -155,6 +155,7 @@ export class LedCubeWS extends EventEmitter {
 				return {
 					success: true,
 					animations: [
+						"Bad Apple.ledcube",
 						"cercle chromatique carre.ledcube",
 						"cercle chromatique rond.ledcube",
 						"coeur.ledcube",
