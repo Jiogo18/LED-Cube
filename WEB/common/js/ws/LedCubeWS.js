@@ -137,8 +137,13 @@ export class LedCubeWS extends EventEmitter {
 				const response = await fetch(webFolder + '../animations/' + fileName);
 				response.success = response.ok;
 				const reader = response.body.getReader();
-				const uint8Array = await reader.read();
-				const data = new TextDecoder().decode(uint8Array.value);
+				var data = '';
+				var newData;
+				do {
+					const uint8Array = await reader.read();
+					newData = new TextDecoder().decode(uint8Array.value);
+					data += newData;
+				} while (newData);
 				response.animation = this.decodeAnimation(data);
 				return response;
 			},
