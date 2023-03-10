@@ -2,6 +2,7 @@ import { LEDAnimation } from '../utils/frame.js';
 import { EventEmitter } from '../utils/EventEmitter.js';
 import { addNotif } from '../utils/notifications.js';
 import { CubeViewer } from '../viewer/cubeViewer.js';
+// Bcrypt64 is loaded in the html
 
 /**
  * This is the main class to connect to the server and send/receive data.
@@ -190,6 +191,9 @@ export class LedCubeWS extends EventEmitter {
 	 * @returns {string} String zipped and encoded in base64
 	 */
 	strToZip(string) {
+		if (!Base64) {
+			throw new Error('Base64 not loaded, please load it from the page');
+		}
 		var dec = new TextEncoder().encode(string);
 		var zip = pako.deflate(dec, { level: 9 });
 		var base64 = Array.from(zip).map(c => String.fromCharCode(c)).join('');
@@ -200,6 +204,9 @@ export class LedCubeWS extends EventEmitter {
 	 * @returns {string} String unzipped
 	 */
 	zipToStr(base64) {
+		if (!Base64) {
+			throw new Error('Base64 not loaded, please load it from the page');
+		}
 		var zip = Base64.decode(base64.substring(1)).split('').map(c => c.charCodeAt(0));
 		var enc = pako.inflate(zip, { level: 9 });
 		var string = new TextDecoder('utf-8').decode(enc);

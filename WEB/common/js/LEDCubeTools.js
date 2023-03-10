@@ -28,7 +28,8 @@ export class LEDCubeTools extends EventEmitter {
 		DISCONNECTED: 'disconnected',
 		PAGE_LOADED: 'onLoaded',
 		FRAMES_CHANGED: 'frameschanged',
-		PICKUP_COLOR: 'pickup_color'
+		PICKUP_COLOR: 'pickup_color',
+		PAGE_UNLOADED: 'page_unloaded',
 	}
 
 	constructor() {
@@ -41,6 +42,7 @@ export class LEDCubeTools extends EventEmitter {
 		this.registerEvent(this.EVENTS.PAGE_LOADED, true);
 		this.registerEvent(this.EVENTS.FRAMES_CHANGED);
 		this.registerEvent(this.EVENTS.PICKUP_COLOR);
+		this.registerEvent(this.EVENTS.PAGE_UNLOADED);
 
 		this.ledcubeWS.addEventListener(this.ledcubeWS.EVENTS.LOGGED, () => this.emitEvent(this.EVENTS.LOGGED));
 		this.ledcubeWS.addEventListener(this.ledcubeWS.EVENTS.DISCONNECTED, () => this.emitEvent(this.EVENTS.DISCONNECTED));
@@ -61,6 +63,10 @@ export class LEDCubeTools extends EventEmitter {
 			}
 
 			this.emitEvent(this.EVENTS.PAGE_LOADED);
+		});
+
+		window.addEventListener('beforeunload', () => {
+			this.emitEvent(this.EVENTS.PAGE_UNLOADED);
 		});
 	}
 
