@@ -43,7 +43,28 @@ export class Vector3D {
 		return this;
 	}
 
+
+	/**
+	 * @param {Vector3D} vector
+	 */
+	sub(pos) {
+		this.x -= pos.x;
+		this.y -= pos.y;
+		this.z -= pos.z;
+		return this;
+	}
+
+	/**
+	 * @param {Vector3D} vec
+	 */
 	equals(vec) { return this.x == vec.x && this.y == vec.y && this.z == vec.z; }
+
+	/**
+	 * @param {number} x
+	 * @param {number} y
+	 * @param {number} z
+	 */
+	set(x, y, z) { this.x = x; this.y = y; this.z = z; }
 };
 
 export class Pos3D extends Vector3D {
@@ -64,6 +85,15 @@ export class Pos3D extends Vector3D {
 		if (this.z >= ZLENGTH) this.z = ZLENGTH - 1;
 		return this;
 	}
+
+	/**
+	 * @param {Pos3D} pos
+	 */
+	sub(pos) {
+		return this.add(new Vector3D(-pos.x, -pos.y, -pos.z));
+	}
+
+	toVector3D() { return new Vector3D(this.x, this.y, this.z); }
 };
 
 ledCubeTools.addEventListener(ledCubeTools.EVENTS.PAGE_LOADED, async () => {
