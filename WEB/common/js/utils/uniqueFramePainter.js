@@ -43,7 +43,28 @@ export class Vector3D {
 		return this;
 	}
 
+
+	/**
+	 * @param {Vector3D} vector
+	 */
+	sub(pos) {
+		this.x -= pos.x;
+		this.y -= pos.y;
+		this.z -= pos.z;
+		return this;
+	}
+
+	/**
+	 * @param {Vector3D} vec
+	 */
 	equals(vec) { return this.x == vec.x && this.y == vec.y && this.z == vec.z; }
+
+	/**
+	 * @param {number} x
+	 * @param {number} y
+	 * @param {number} z
+	 */
+	set(x, y, z) { this.x = x; this.y = y; this.z = z; }
 };
 
 export class Pos3D extends Vector3D {
@@ -64,6 +85,15 @@ export class Pos3D extends Vector3D {
 		if (this.z >= ZLENGTH) this.z = ZLENGTH - 1;
 		return this;
 	}
+
+	/**
+	 * @param {Pos3D} pos
+	 */
+	sub(pos) {
+		return this.add(new Vector3D(-pos.x, -pos.y, -pos.z));
+	}
+
+	toVector3D() { return new Vector3D(this.x, this.y, this.z); }
 };
 
 ledCubeTools.addEventListener(ledCubeTools.EVENTS.PAGE_LOADED, async () => {
@@ -72,6 +102,7 @@ ledCubeTools.addEventListener(ledCubeTools.EVENTS.PAGE_LOADED, async () => {
 	ledCubeTools.cubeViewer.showAxis();
 	events.onStart();
 	console.log('uniqueFramePainter loaded');
+	if (!ledCubeTools.ledcubeWS.isConnecting()) onWebSocketConnected();
 });
 
 async function onWebSocketConnected() {
@@ -85,6 +116,12 @@ async function onWebSocketConnected() {
 	else {
 		ledCubeTools.ledcubeWS.sendLedcube.set_animation_frame_count(1);
 	}
+
+	const animation = await ledCubeTools.ledcubeWS.sendLedcube.animation.get_current();
+	if (animation.animation.frames.length === 1) {
+		uniqueFrame = ledCubeTools.cubeViewer.animation.frames[0] = animation.animation.frames[0];
+	}
+
 	events.onReady();
 	console.log('uniqueFramePainter ready');
 }
@@ -92,21 +129,46 @@ async function onWebSocketConnected() {
 /**
  * @param {Pos3D} pos
  * @param {number} color
- * @param {boolean} refresh
+ * @param {{ refresh: boolean, send: boolean }} options
  */
-export function paintLed(pos, color, refresh = true) {
+export function paintLed(pos, color, options = { refresh: true, send: true }) {
+	if (!pos) return;
 	uniqueFrame.setColor(pos.x, pos.y, pos.z, color);
-	if (refresh) ledCubeTools.cubeViewer.refresh();
-	if (ledCubeTools.ledcubeWS.isConnected()) {
+	if ((options?.refresh ?? true)) ledCubeTools.cubeViewer.refresh();
+	if (ledCubeTools.ledcubeWS.isConnected() && (options?.send ?? true)) {
 		ledCubeTools.ledcubeWS.sendLedcube.setLed({ x: pos.x, y: pos.y, z: pos.z, color: color });
 	}
 }
 
+/**
+ * @param {Pos3D} pos
+ */
+export function readLed(pos) {
+	if (!pos) return;
+	return uniqueFrame.getColor(pos.x, pos.y, pos.z);
+}
+
+/**
+ * @param {number} color
+ */
+export function findColor(color) {
+	for (let x = 0; x < XLENGTH; x++) {
+		for (let y = 0; y < YLENGTH; y++) {
+			for (let z = 0; z < ZLENGTH; z++) {
+				if (uniqueFrame.getColor(x, y, z) == color) {
+					return new Pos3D(x, y, z);
+				}
+			}
+		}
+	}
+	return undefined;
+}
+
 export function paintAxis() {
-	paintLed(new Pos3D(0, 0, 0), 0xFFFFFF, false)
-	paintLed(new Pos3D(1, 0, 0), 0xFF0000, false)
-	paintLed(new Pos3D(0, 1, 0), 0x00FF00, false)
-	paintLed(new Pos3D(0, 0, 1), 0x0000FF, true)
+	paintLed(new Pos3D(0, 0, 0), 0xFFFFFF, { refresh: false })
+	paintLed(new Pos3D(1, 0, 0), 0xFF0000, { refresh: false })
+	paintLed(new Pos3D(0, 1, 0), 0x00FF00, { refresh: false })
+	paintLed(new Pos3D(0, 0, 1), 0x0000FF, { refresh: true })
 }
 
 /**

@@ -10,5 +10,5 @@
 // On windows, we have to include another bycrypt.h
 // We could use this bcrypt.h in the project, but for simplicity, we use the one from Bcrypt.cpp
 #include <windows.h>
-#include <../shared/bcrypt.h>
+#include <../shared/bcrypt.h> // Windows Kit/10/Include/10.0.xxx.0/shared/bcrypt.h
 #endif

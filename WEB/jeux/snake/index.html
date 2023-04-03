@@ -24,6 +24,9 @@
 	<link rel="modulepreload" href="../../common/js/main.js">
 	<link rel="modulepreload" href="../../common/js/utils/uniqueFramePainter.js">
 	<link rel="modulepreload" href="./snake.js">
+	<script src="../../include/bcryptjs/dist/bcrypt.js"></script>
+	<script src="../../include/zip/pako.js"></script>
+	<script src="../../include/zip/base64.js"></script>
 
 	<script src="../../common/js/viewer/three.min.js"></script>
 	<script src="../../common/js/viewer/Detector.js"></script>
@@ -32,6 +35,21 @@
 	<script src="../../include/bcryptjs/dist/bcrypt.js"></script>
 	<script>var module = {};</script>
 	<script type="module">import snake_import from "./snake.js"; module = snake_import;</script>
+
+	<style>
+		.cube_overlay {
+			position: absolute;
+			color: white;
+			font-size: 1em;
+			padding: 1em;
+			user-select: none;
+		}
+
+		#score_overlay {
+			top: 0;
+			left: 0;
+		}
+	</style>
 </head>
 
 <body>
@@ -47,7 +65,9 @@
 
 		<div class="contentviewer">
 			<h1 class="title">Viewer 3D</h1>
-			<div id="cube_container"></div>
+			<div id="cube_container">
+				<span id="score_overlay" class="cube_overlay">Score : 0</span>
+			</div>
 			<button id="cube_container_axis" class="grey" onclick="module.ledCubeTools.cubeViewer.toggleAxis()">Axes</button>
 		</div>
 
@@ -59,6 +79,9 @@
 				<button id="blueButton" class="colorButton grey">Bleu</button>
 			</div>
 			<input class="hugemargin" type="color" id="pickColor">
+			<div class="buttons" style="max-width: unset;">
+				<button id="snakeAutoButton" class="grey" onclick="module.toggleSnakeAuto()">Snake auto</button>
+			</div>
 		</div>
 	</div>
 	<table id="contentnotifs"></table>
