@@ -63,7 +63,7 @@ function askCookies(callback) {
 	buttonDeny.type = 'button';
 	buttonDeny.style.width = '0%';
 	buttonDeny.style.opacity = 0;
-	console.log(loginButtonDiv.appendChild(buttonDeny));
+	loginButtonDiv.appendChild(buttonDeny);
 	// Grow
 	setTimeout(() => buttonDeny.style.removeProperty('width'), 1);
 
@@ -108,6 +108,39 @@ function askCookies(callback) {
 	loginForm.insertBefore(divMessage, loginInputs[0]);
 }
 
+function hideAskCookies() {
+	let loginForm = document.querySelector('#loginForm');
+
+	// Show inputs by removing the translation
+	/** @type {HTMLDivElement[]} */
+	let loginInputs = loginForm.querySelectorAll('.input-field');
+	loginInputs[0].style.transform = 'translateX(0%)';
+	loginInputs[1].style.transform = 'translateX(0%)';
+
+	// Reset the login button
+	/** @type {HTMLDivElement} */
+	let loginButtonDiv = loginForm.querySelector('#button-login');
+	let loginButton = loginButtonDiv.querySelector('button.cookies-allow');
+	let buttonDeny = document.querySelector('button.cookies-deny');
+
+	// Hide the buttons
+	loginButton.style.opacity = 0;
+	buttonDeny.style.opacity = 0;
+	loginButton.classList.remove('cookies-allow');
+	setTimeout(() => {
+		loginButton.textContent = 'Se connecter';
+		loginButton.style.removeProperty('opacity');
+		buttonDeny.remove();
+		loginButton.disabled = false;
+		loginButton.onclick = () => { };
+	}, 500);
+
+
+	// Remove the message
+	let divMessage = document.querySelector('#cookies-message');
+	divMessage.remove();
+}
+
 function loginLedCube() {
 	if (!ledcubeWS.cookies.areAllowed()) {
 		askCookies(() => {
@@ -133,22 +166,28 @@ function loginLedCube() {
 	ledcubeWS.connect();
 }
 
+/**
+ * @param {HTMLElement} element
+ */
+function shakeLogin(element) {
+	if (document.querySelector('#cookies-message'))
+		hideAskCookies();
+	element.setAttribute('shake', 'true');
+	setTimeout(() => {
+		element.removeAttribute('shake');
+	}, 1000);
+}
+
 function onWrongPassword() {
 	// shake the password input
 	const field = document.querySelector('#field-password');
-	field.setAttribute('shake', 'true');
-	setTimeout(() => {
-		field.removeAttribute('shake');
-	}, 1000);
+	shakeLogin(field);
 }
 
 function onAuthCancel() {
 	// shake the button
 	const button = document.querySelector('#button-login');
-	button.setAttribute('shake', 'true');
-	setTimeout(() => {
-		button.removeAttribute('shake');
-	}, 1000);
+	shakeLogin(button);
 }
 
 function onLogged() {
